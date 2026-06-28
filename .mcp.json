@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "suitime": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\cuent\\Documents\\Proyectos\\Control y gestion de tiempos SUI\\mcp_suitime\\server.py"
+      ],
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONIOENCODING": "utf-8"
+      }
+    }
+  }
+}

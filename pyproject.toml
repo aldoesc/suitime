@@ -1,0 +1,153 @@
+[project]
+name = "gestor-operacional-sui"
+version = "1.0.1"
+description = "SUItime — control de tareas, tiempos y objetivos (Flet desktop + Android)"
+authors = [
+    { name = "Christian Balbin", email = "cmbalbin@hotmail.com" },
+]
+requires-python = ">=3.10"
+dependencies = [
+    "flet>=0.21",
+    "bcrypt>=4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+# ---------------------------------------------------------------------------
+# Configuración de `flet build` (empaquetado multiplataforma)
+#
+# Uso básico:
+#   flet build apk       → APK Android (debug firmado con llave de desarrollo)
+#   flet build apk --release  → APK firmado para publicar (requiere keystore)
+#   flet build ipa       → iOS (requiere macOS + Xcode)
+#   flet build windows   → Ejecutable Windows
+#   flet build macos     → .app macOS (requiere macOS)
+#   flet build linux     → Binario Linux
+#
+# Requisitos para Android:
+#   - Flutter SDK instalado (flet build usa Flutter internamente)
+#   - Android SDK + NDK (se instalan vía Android Studio o sdkmanager)
+#   - Variable ANDROID_HOME apuntando al SDK
+#   - Para release: keystore propio (keytool -genkey -v -keystore ...)
+# ---------------------------------------------------------------------------
+[tool.flet]
+org = "com.hexa38"
+product = "SUItime"
+company = "Hexa38"
+copyright = "Copyright © 2026 Christian Balbin"
+
+# Color de fondo del splash screen — matchea page.bgcolor en main.py para
+# que la transición del arranque al login sea suave (sin flash blanco).
+# `splash_color` se aplica en modo claro; `splash_dark_color` en oscuro.
+# El usuario reportó que el icono salía "cortado" porque se renderizaba
+# borde a borde; ahora `assets/splash.png` tiene 25% de margen transparente
+# alrededor para que Android no le coma las esquinas.
+splash_color = "#121212"
+splash_dark_color = "#121212"
+
+# Punto de entrada del módulo principal (archivo que define main(page)).
+# Flet compila todo el directorio actual; este campo sólo indica el módulo.
+module = "main"
+
+# Carpeta donde Flet busca icon.png / splash.png / fuentes, etc.
+# Flet reconoce por convención:
+#   assets/icon.png              → icono principal (1024x1024 recomendado)
+#   assets/icon_windows.png      → icono específico Windows
+#   assets/icon_android.png      → icono específico Android (si se quiere distinto)
+#   assets/icon_ios.png          → icono específico iOS
+#   assets/splash.png            → splash screen al arrancar
+assets = "assets"
+
+# Archivos a excluir del bundle (reducen el tamaño del APK):
+#   - base de datos local (se crea al primer arranque)
+#   - uploads (carpeta de adjuntos locales)
+#   - logs, caches
+#   - tests, config, documentos del desarrollador
+build_exclude = [
+    # Bases y logs locales del desarrollador
+    "gestor_operacional.db",
+    "gestor.log",
+    "*.log",
+    "**/*.log",
+    # Artefactos del propio proceso de build (evita bundle recursivo →
+    # instalador de 1.3 GB que además rompe Gradle R8 en Android con
+    # "Zip error while reading archive zip END header not found").
+    "build/**",
+    "build.zip",              # archivo de nivel raíz que deja flet-cli
+    ".flet/**",
+    # Instaladores previos que NO deben volver al bundle. Duplicamos patrones
+    # porque Flet a veces snapshotea antes de evaluar excludes recursivos, y
+    # los .exe del instalador (50+23 MB) terminaban empaquetados dentro del
+    # app.zip del APK inflando a 142 MB.
+    "installer/Output/**",
+    "installer/Output/*",
+    "installer/Output/*.exe",
+    "installer/**/*.exe",
+    "SUItime-Setup-*.exe",
+    "GestorSUI-Setup-*.exe",
+    "suitime.exe",
+    "gestor-operacional-sui.exe",
+    # Iconos del instalador Windows (Flet usa assets/icon.png, no estos).
+    # 4 MB cada uno; no aportan nada al bundle mobile/desktop.
+    "icono.ico",
+    "icono.png",
+    # Uploads, tests, configs privadas
+    "uploads/**",
+    "tests/**",
+    ".env_local",
+    "cloud_config.json",
+    "gestor-api/**",
+    "reset_db.py",
+    # Caches
+    "__pycache__/**",
+    "**/__pycache__/**",
+    "*.pyc",
+    "**/*.pyc",
+    # Otros caches / repos
+    ".git/**",
+    ".venv/**",
+    "venv/**",
+    "node_modules/**",
+    # Documentos de desarrollador
+    "BUILD_MOBILE.md",
+    "BUILD_IOS.md",
+]
+
+[tool.flet.app]
+path = "."
+
+[tool.flet.android]
+# identificador único de la app en Play Store / sistema Android
+package_name = "com.hexa38.gestorsui"
+# versión mostrada al usuario
+version_name = "1.0.1"
+# número interno (entero, debe incrementarse con cada release subido)
+version_code = 2
+# permisos requeridos por la app:
+#   INTERNET               → para sync cloud
+#   ACCESS_NETWORK_STATE   → detectar online/offline
+#   CAMERA                 → tomar fotos de adjuntos
+#   READ_EXTERNAL_STORAGE  → leer archivos para adjuntar (Android <13)
+#   READ_MEDIA_IMAGES      → leer imágenes (Android 13+)
+permissions = [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.CAMERA",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.READ_MEDIA_IMAGES",
+]
+
+[tool.flet.ios]
+bundle_id = "com.hexa38.gestorsui"
+# Descripciones que aparecen en el prompt de permisos de iOS
+info_plist = { NSCameraUsageDescription = "Necesitamos la cámara para fotografiar facturas y adjuntos de la tarea.", NSPhotoLibraryUsageDescription = "Necesitamos acceso a la galería para seleccionar imágenes que adjuntar." }
+
+[tool.flet.windows]
+# Metadata que se embebe en el .exe resultante (visible en Propiedades del archivo).
+product_name = "SUItime"
+file_description = "SUItime"
+product_version = "1.0.1"
+file_version = "1.0.1.0"

@@ -1,0 +1,42 @@
+# Editor
+.vscode/
+
+# Credenciales y config por máquina
+.env
+.env.*
+.env_local
+cloud_config.json
+*.key
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+venv/
+.venv/
+
+# Build / distribución
+dist/
+build/
+.flet/
+*.exe
+*.apk
+*.ipa
+
+# Node (gestor-api si existe)
+node_modules/
+.wrangler/
+
+# OS
+.DS_Store
+Thumbs.db
